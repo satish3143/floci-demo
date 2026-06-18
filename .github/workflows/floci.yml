@@ -1,4 +1,4 @@
-name: Floci CI/CD Pipeline
+name: Advanced CI/CD Pipeline
 
 on:
   push:
@@ -18,11 +18,36 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Start Floci
+    # ======================
+    # BUILD STAGE
+    # ======================
+    - name: Build application
+      run: |
+        echo "Building project..."
+        mkdir build
+        cp app.txt build/
+        echo "build completed"
+
+    # ======================
+    # TEST STAGE
+    # ======================
+    - name: Run tests
+      run: |
+        echo "Running tests..."
+        test -f build/app.txt
+        echo "tests passed"
+
+    # ======================
+    # START FLoci
+    # ======================
+    - name: Start Floci (S3 emulator)
       run: |
         docker run -d --name floci -p 4566:4566 floci/floci:latest
-        sleep 5
+        sleep 20
 
+    # ======================
+    # INSTALL AWS CLI
+    # ======================
     - name: Install AWS CLI
       run: |
         sudo apt-get update
@@ -30,15 +55,17 @@ jobs:
         pip3 install awscli
         aws --version
 
+    # ======================
+    # DEPLOY STAGE
+    # ======================
     - name: Create S3 bucket
       run: |
         aws --endpoint-url=http://localhost:4566 s3 mb s3://demo-bucket
 
-    - name: Upload file
+    - name: Upload artifact
       run: |
-        echo "Hello from GitHub Actions + Floci" > app.txt
-        aws --endpoint-url=http://localhost:4566 s3 cp app.txt s3://demo-bucket/
+        aws --endpoint-url=http://localhost:4566 s3 cp build/app.txt s3://demo-bucket/
 
-    - name: Verify
+    - name: Verify deployment
       run: |
         aws --endpoint-url=http://localhost:4566 s3 ls s3://demo-bucket
