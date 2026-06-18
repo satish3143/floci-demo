@@ -21,7 +21,7 @@ jobs:
     - name: Start Floci
       run: |
         docker run -d --name floci -p 4566:4566 floci/floci:latest
-        sleep 20
+        sleep 5
 
     - name: Install AWS CLI
       run: |
