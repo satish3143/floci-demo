@@ -8,6 +8,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_EC2_METADATA_DISABLED: true
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -17,7 +23,7 @@ jobs:
         docker run -d --name floci -p 4566:4566 floci/floci:latest
         sleep 20
 
-    - name: Install AWS CLI (FIXED)
+    - name: Install AWS CLI
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pip
