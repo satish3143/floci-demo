@@ -12,25 +12,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Start Floci container
+    - name: Start Floci
       run: |
         docker run -d --name floci -p 4566:4566 floci/floci:latest
         sleep 20
 
-    - name: Install AWS CLI
+    - name: Install AWS CLI (FIXED)
       run: |
         sudo apt-get update
-        sudo apt-get install -y awscli
+        sudo apt-get install -y python3-pip
+        pip3 install awscli
+        aws --version
 
     - name: Create S3 bucket
       run: |
         aws --endpoint-url=http://localhost:4566 s3 mb s3://demo-bucket
 
-    - name: Upload file to S3
+    - name: Upload file
       run: |
         echo "Hello from GitHub Actions + Floci" > app.txt
         aws --endpoint-url=http://localhost:4566 s3 cp app.txt s3://demo-bucket/
 
-    - name: Verify S3
+    - name: Verify
       run: |
         aws --endpoint-url=http://localhost:4566 s3 ls s3://demo-bucket
