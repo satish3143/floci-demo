@@ -1,0 +1,36 @@
+name: Floci CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Start Floci container
+      run: |
+        docker run -d --name floci -p 4566:4566 floci/floci:latest
+        sleep 20
+
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y awscli
+
+    - name: Create S3 bucket
+      run: |
+        aws --endpoint-url=http://localhost:4566 s3 mb s3://demo-bucket
+
+    - name: Upload file to S3
+      run: |
+        echo "Hello from GitHub Actions + Floci" > app.txt
+        aws --endpoint-url=http://localhost:4566 s3 cp app.txt s3://demo-bucket/
+
+    - name: Verify S3
+      run: |
+        aws --endpoint-url=http://localhost:4566 s3 ls s3://demo-bucket
